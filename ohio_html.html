@@ -406,25 +406,24 @@ var regionData = {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-
 function addLayers() {
     // Add county layer
-countyLayer = L.geoJSON(countyData, {
-    style: function(feature) {
-        return {
-            color: getColor(feature.properties[currentElectionResult]),
-            weight: 1,
-            fillOpacity: 0.5
-        };
-    },
-    onEachFeature: function (feature, layer) {
-        // You can add more properties here if you want them in the popup
-layer.bindTooltip(`
-    <strong>${feature.properties.NAME}</strong><br />
-    Election result: ${(feature.properties[currentElectionResult]*100).toFixed(1)}%
-`);
-    }
-});
+    countyLayer = L.geoJSON(countyData, {
+        style: function(feature) {
+            return {
+                color: getColor(feature.properties[currentElectionResult]),
+                weight: 1,
+                fillOpacity: 0.5
+            };
+        },
+        onEachFeature: function (feature, layer) {
+            // You can add more properties here if you want them in the popup
+            layer.bindTooltip(`
+                <strong>${feature.properties.NAME}</strong><br />
+                Election result: ${(feature.properties[currentElectionResult]*100).toFixed(1)}%
+            `);
+        }
+    });
 
     // Add region layer
     regionLayer = L.geoJSON(regionData, {
@@ -463,8 +462,11 @@ layer.bindTooltip(`
     });
     countyLayer.addTo(map);
     regionLayer.addTo(map);
+}
 
-};
+// Call addLayers() after the map initialization
+addLayers();
+
 </script>
 
 </body>
