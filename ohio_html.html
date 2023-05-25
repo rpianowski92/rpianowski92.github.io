@@ -294,11 +294,11 @@ document.getElementById('election-swing-select').addEventListener('change', hand
             // Load county and region GeoJSON data
         var countyData;
         var regionData;
-        fetch('https://rpianowski92.github.io/ohio_counties.geojson')
+        fetch('https://cors-anywhere.herokuapp.com/https://rpianowski92.github.io/ohio_counties.geojson')
             .then(response => response.json())
             .then(data => {
                 countyData = data;
-                fetch('https://rpianowski92.github.io/ohio_regions.geojson')
+                fetch('https://cors-anywhere.herokuapp.com/https://rpianowski92.github.io/ohio_regions.geojson')
                     .then(response => response.json())
                     .then(data => {
                         regionData = data;
