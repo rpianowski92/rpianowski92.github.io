@@ -1,0 +1,370 @@
+<head>
+    <title>Transparent Map Overlays</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+
+    <style>
+        #map {
+            width: 100%;
+            height: 650px;
+        }
+        .region-label {
+            font-weight: bold;
+            font-size: 14px;
+            text-align: left;
+            color: #000;
+        }
+        h1 {
+            text-align: center;
+        }
+        #color-scale-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        #color-scale {
+            width: 200px;
+            height: 20px;
+            background: linear-gradient(to right, rgb(255, 0, 0), rgb(255, 255, 255), rgb(0, 0, 255));
+        }
+        #cutoffs {
+            display: flex;
+            justify-content: space-between;
+            width: 200px;
+            margin-bottom: 5px;
+
+        }
+        #cutoffs span {
+            font-size: 12px;
+        }
+        .leaflet-tooltip {
+    background-color: rgba(255, 255, 255, 0.8);
+    border: none;
+    color: #333;
+    </style>
+</head>
+<body>
+    <h1>Ohio regions and Election Results</h1>
+
+    <div id="color-scale-container">
+        <div id="cutoffs">
+            <span id="lower-cutoff">25%</span>
+            <span id="middle-cutoff">50%</span>
+            <span id="upper-cutoff">75%</span>
+        </div>
+        <div id="color-scale"></div>
+        <div style="display: flex; justify-content: space-between; width: 100%; margin-top: 20px;">
+            <div>
+            <b>Election Results</b> 
+            <select id="election-result-select">
+        <option value="">Not selected</option>
+        <option value="US_Senate_2018" selected>US Senate 2018</option>
+        <option value="President_2020">President 2020</option>
+        <option value="President_2016">President 2016</option>
+        <option value="President_2012">President 2012</option>
+        <option value="President_2008">President 2008</option>
+        <option value="President_2004">President 2004</option>
+        <option value="President_2000">President 2000</option>
+        <option value="US_Senate_2016">US Senate 2016</option>
+        <option value="US_Senate_2012">US Senate 2012</option>
+        <option value="US_Senate_2010">US Senate 2010</option>
+        <option value="US_Senate_2006">US Senate 2006</option>
+        <option value="US_Senate_2004">US Senate 2004</option>
+        <option value="US_Senate_2000">US Senate 2000</option>
+        <option value="Attorney_General_2018">Attorney General 2018</option>
+        <option value="Attorney_General_2014">Attorney General 2014</option>
+        <option value="Attorney_General_2010">Attorney General 2010</option>
+        <option value="Attorney_General_2006">Attorney General 2006</option>
+        <option value="Attorney_General_2002">Attorney General 2002</option>
+        <option value="Auditor_2018">Auditor 2018</option>
+        <option value="Auditor_2014">Auditor 2014</option>
+        <option value="Auditor_2010">Auditor 2010</option>
+        <option value="Auditor_2006">Auditor 2006</option>
+        <option value="Auditor_2002">Auditor 2002</option>
+        <option value="Governor_2018">Governor 2018</option>
+        <option value="Governor_2014">Governor 2014</option>
+        <option value="Governor_2010">Governor 2010</option>
+        <option value="Governor_2006">Governor 2006</option>
+        <option value="Governor_2002">Governor 2002</option>
+        <option value="Secretary_of_State_2018">Secretary of State 2018</option>
+        <option value="Secretary_of_State_2014">Secretary of State 2014</option>
+        <option value="Secretary_of_State_2010">Secretary of State 2010</option>
+        <option value="Secretary_of_State_2006">Secretary of State 2006</option>
+        <option value="Secretary_of_State_2002">Secretary of State 2002</option>
+        <option value="Treasurer_2018">Treasurer 2018</option>
+        <option value="Treasurer_2014">Treasurer 2014</option>
+        <option value="Treasurer_2010">Treasurer 2010</option>
+        <option value="Treasurer_2006">Treasurer 2006</option>
+        <option value="Treasurer_2002">Treasurer 2002</option>                <!-- Add more options as needed -->
+            </select>
+        </div>
+        <div style="margin-left: 20px;">
+            <b>Election Swings</b> 
+            <select id="election-swing-select">
+                <option value="">Not selected</option>
+        <option value="US_Senate_2018_minus_President_2020">US Senate 2018 minus President 2020</option>
+        <option value="US_Senate_2018_minus_President_2016">US Senate 2018 minus President 2016</option>
+        <option value="US_Senate_2018_minus_US_Senate_2012">US Senate 2018 minus US Senate 2012</option>
+        <option value="US_Senate_2018_minus_US_Senate_2016">US Senate 2018 minus US Senate 2016</option>
+        <option value="US_Senate_2018_minus_Attorney_General_2018">US Senate 2018 minus Attorney General 2018</option>
+        <option value="US_Senate_2018_minus_Auditor_2018">US Senate 2018 minus Auditor 2018</option>
+        <option value="US_Senate_2018_minus_Governor_2018">US Senate 2018 minus Governor 2018</option>
+        <option value="US_Senate_2018_minus_Secretary_of_State_2018">US Senate 2018 minus Secretary of State 2018</option>
+        <option value="US_Senate_2018_minus_Treasurer_2018">US Senate 2018 minus Treasurer 2018</option>
+        <option value="President_2020_minus_President_2016">President 2020 minus President 2016</option>
+        <option value="US_Senate_2012_minus_US_Senate_2006">US Senate 2012 minus US Senate 2006</option>
+        <option value="US_Senate_2012_minus_President_2012">US Senate 2012 minus President 2012</option>                 
+                <!-- Add more options as needed -->
+            </select>
+            </div>
+        </div>
+    </div>
+    <div id="map"></div>
+
+<script>
+    // Initialize the map
+    var map = L.map('map').setView([40, -82], 7); // You can set the initial coordinates and zoom level based on your state
+    function interpolateColor(a, b, t) {
+        const [r1, g1, b1] = a;
+        const [r2, g2, b2] = b;
+
+        const r = r1 + (r2 - r1) * t;
+        const g = g1 + (g2 - g1) * t;
+        const bInterpolated = b1 + (b2 - b1) * t;
+
+        return `rgb(${r.toFixed(0)}, ${g.toFixed(0)}, ${bInterpolated.toFixed(0)})`;
+    }
+
+let lastSelectedDropdown = "results";
+
+function getColor(value) {
+    const red = [255, 0, 0];
+    const white = [255, 255, 255];
+    const blue = [0, 0, 255];
+
+    let cutoff1, cutoff2, cutoff3;
+    if (lastSelectedDropdown === "results") {
+        cutoff1 = 0.25;
+        cutoff2 = 0.5;
+        cutoff3 = 0.75;
+    } else {
+        cutoff1 = -0.1;
+        cutoff2 = 0;
+        cutoff3 = 0.1;
+    }
+
+    if (value < cutoff1) {
+        return 'rgb(255, 0, 0)';
+    } else if (value <= cutoff2) {
+        return interpolateColor(red, white, (value - cutoff1) / (cutoff2 - cutoff1));
+    } else if (value <= cutoff3) {
+        return interpolateColor(white, blue, (value - cutoff2) / (cutoff3 - cutoff2));
+    } else {
+        return 'rgb(0, 0, 255)';
+    }
+}
+
+// Function to adjust label position for specific regions
+function getAdjustedLabelPositions(center, region) {
+    let offsetX = 0;
+    let offsetY = 0;
+
+    const positions = [];
+/*
+    if (region === "Eastern Montana") {
+        offsetX = 0;
+        offsetY = 0;
+    } else if (region === "Tribal Areas") {
+        offsetX = -1;
+        offsetY = 1.5;
+    } else if (region === "Billings") {
+        offsetX = -0.6;
+        offsetY = 0;
+    } else if (region === "Bozeman") {
+        offsetX = -0.3;
+        offsetY = 0;
+    } else if (region === "Flathead and Bitterroot") {
+        offsetX = -1;
+        offsetY = 2;
+    } else if (region === "Missoula and Butte") {
+        offsetX = -0.21;
+        offsetY = 0;
+    }
+*/
+    positions.push({
+        lat: center.lat + offsetY,
+        lng: center.lng + offsetX,
+        fontSize: '16px'
+    });
+/*
+    // Add additional label positions for specific regions with different font size
+    if (region === "Tribal Areas") {
+        positions.push({
+            lat: center.lat + offsetY + 0.25,
+            lng: center.lng + offsetX - 3,
+            fontSize: '10px'
+        });
+        positions.push({
+            lat: center.lat + offsetY - 3,
+            lng: center.lng + offsetX + 2.5,
+            fontSize: '12px'
+        });
+            positions.push({
+            lat: center.lat + offsetY - 0,
+            lng: center.lng + offsetX + 4.4,
+            fontSize: '12px'
+        });
+    } else if (region === "Flathead and Bitterroot") {
+        positions.push({
+            lat: center.lat + offsetY - 3.2,
+            lng: center.lng + offsetX + 1.5,
+            fontSize: '10px'
+        });
+    } else if (region === "Central Montana") {
+        positions.push({
+            lat: center.lat + offsetY + 1.3,
+            lng: center.lng + offsetX - 2,
+            fontSize: '10px'
+        });
+    } 
+*/
+    return positions;
+}
+
+// Function to update cutoffs
+function updateCutoffs(lower, middle, upper) {
+    document.getElementById('lower-cutoff').textContent = lower;
+    document.getElementById('middle-cutoff').textContent = middle;
+    document.getElementById('upper-cutoff').textContent = upper;
+}
+
+        var currentElectionResult = "US_Senate_2018";
+        var countyLayer;
+        var regionLayer;
+
+
+function getColorScale() {
+    if (lastSelectedDropdown === "results") {
+        return 'linear-gradient(to right, rgb(255, 0, 0), rgb(255, 255, 255), rgb(0, 0, 255))';
+    } else {
+        return 'linear-gradient(to right, rgb(255, 0, 0), rgb(255, 255, 255), rgb(0, 0, 255))';
+    }
+}
+
+function handleElectionResultChange() {
+    if (this.value === "Not selected") {
+        return;
+    }
+    lastSelectedDropdown = "results";
+    currentElectionResult = this.value;
+    document.getElementById('election-swing-select').value = 'Not selected';
+    document.getElementById('color-scale').style.background = getColorScale();
+    map.removeLayer(countyLayer);
+    map.removeLayer(regionLayer);
+    updateCutoffs('25%', '50%', '75%');  // update cutoffs here
+    addLayers();
+}
+
+function handleElectionSwingChange() {
+    if (this.value === "Not selected") {
+        return;
+    }
+    lastSelectedDropdown = "swings";
+    currentElectionResult = this.value;
+    document.getElementById('election-result-select').value = 'Not selected';
+    document.getElementById('color-scale').style.background = getColorScale();
+    map.removeLayer(countyLayer);
+    map.removeLayer(regionLayer);
+    updateCutoffs('-15%', '0%', '15%');  // update cutoffs here
+    addLayers();
+}
+
+
+
+document.getElementById('election-result-select').addEventListener('change', handleElectionResultChange);
+document.getElementById('election-swing-select').addEventListener('change', handleElectionSwingChange);
+
+
+    // Add the base map (OpenStreetMap)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+            // Load county and region GeoJSON data
+        var countyData;
+        var regionData;
+        fetch('ohio_counties.geojson')
+            .then(response => response.json())
+            .then(data => {
+                countyData = data;
+                fetch('ohio_regions.geojson')
+                    .then(response => response.json())
+                    .then(data => {
+                        regionData = data;
+                        addLayers();
+                    });
+            });
+
+function addLayers() {
+    // Add county layer
+countyLayer = L.geoJSON(countyData, {
+    style: function(feature) {
+        return {
+            color: getColor(feature.properties[currentElectionResult]),
+            weight: 1,
+            fillOpacity: 0.5
+        };
+    },
+    onEachFeature: function (feature, layer) {
+        // You can add more properties here if you want them in the popup
+layer.bindTooltip(`
+    <strong>${feature.properties.NAME}</strong><br />
+    Election result: ${(feature.properties[currentElectionResult]*100).toFixed(1)}%
+`);
+    }
+});
+
+    // Add region layer
+    regionLayer = L.geoJSON(regionData, {
+        interactive: false, // Add this line
+        style: {
+            color: 'black',
+            weight: 3,
+            fillOpacity: 0
+        },
+        onEachFeature: function (feature, layer) {
+            if (feature.properties && feature.properties.region) {
+                const center = layer.getBounds().getCenter();
+                const adjustedPositions = getAdjustedLabelPositions(center, feature.properties.region);
+
+                adjustedPositions.forEach(position => {
+                    const labelText = L.marker([position.lat, position.lng], {
+                        icon: L.divIcon({
+                            className: 'region-label',
+                            html: feature.properties.region,
+                            iconSize: null,
+                            iconAnchor: [30, 10],
+                            cssClass: 'label-' + feature.properties.region.replace(/\s+/g, '-')
+                        }),
+                        zIndexOffset: 1000
+                    }).addTo(map);
+
+                    // Add custom style to the label
+                    const labelClassName = 'label-' + feature.properties.region.replace(/\s+/g, '-');
+                    const labelElements = document.getElementsByClassName(labelClassName);
+                    for (let i = 0; i < labelElements.length; i++) {
+                        labelElements[i].style.fontSize = position.fontSize;
+                    }
+                });
+            }
+        }
+    });
+    countyLayer.addTo(map);
+    regionLayer.addTo(map);
+
+};
+</script>
+
+</body>
+</html>
