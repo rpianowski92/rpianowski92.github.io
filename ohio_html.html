@@ -56,6 +56,14 @@
         <div id="color-scale"></div>
         <div style="display: flex; justify-content: space-between; width: 100%; margin-top: 20px;">
             <div>
+                <b>Display Mode</b> 
+                <select id="display-mode-select">
+                    <option value="support" selected>Support</option>
+                    <option value="turnout">Turnout</option>
+                </select>
+            </div>
+        <div style="display: flex; justify-content: space-between; width: 100%; margin-top: 20px;">
+            <div>
             <b>Election Results</b> 
             <select id="election-result-select">
         <option value="">Not selected</option>
@@ -220,9 +228,9 @@ function getColor(value) {
         cutoff2 = 0.5;
         cutoff3 = 0.75;
     } else {
-        cutoff1 = -0.1;
+        cutoff1 = -0.15;
         cutoff2 = 0;
-        cutoff3 = 0.1;
+        cutoff3 = 0.15;
     }
 
     if (value < cutoff1) {
@@ -299,7 +307,7 @@ function handleElectionSwingChange() {
     
     // Calculate swing for each county
     countyData.features.forEach(function (county) {
-        var swing = county.properties[year1] - county.properties[year2];
+        var swing = county.properties[year2] - county.properties[year1];
         currentElectionSwing[county.properties.GEOID] = swing;
     });
 
@@ -338,7 +346,6 @@ document.getElementById('election-swing-select-2').addEventListener('change', ha
                         addLayers();
                     });
             });
-
 
 function addLayers() {
     // Add county layer
