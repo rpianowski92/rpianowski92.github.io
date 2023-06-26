@@ -222,27 +222,46 @@ function getColor(value) {
 
     const red = [255, 0, 0];
     const white = [255, 255, 255];
-    const black = [0, 0, 0];
+    const grey = [128, 128, 128];
     const blue = [0, 0, 255];
 
-    const colorSchemes = {
-        support: {color1: red, color2: white, color3: blue},
-        turnout: {color1: white, color2: displayMode === "results" ? black : blue, color3: black}
-    };
+    let color1, color2, color3, cutoff1, cutoff2, cutoff3;
 
-    let cutoff1, cutoff2, cutoff3;
-    if (lastSelectedDropdown === "results") {
-        cutoff1 = displayMode === "support" ? 0.25 : 20000;
-        cutoff2 = displayMode === "support" ? 0.5 : 200000;
-        cutoff3 = displayMode === "support" ? 0.75 : 500000;
+    if (displayMode === "support") {
+        // color scheme for support
+        color1 = red;
+        color2 = white;
+        color3 = blue;
+
+        if (lastSelectedDropdown === "results") {
+            cutoff1 = 0.25;
+            cutoff2 = 0.5;
+            cutoff3 = 0.75;
+        } else {
+            cutoff1 = -0.15;
+            cutoff2 = 0;
+            cutoff3 = 0.15;
+        }
+
     } else {
-        cutoff1 = displayMode === "support" ? -0.15 : 0.8;
-        cutoff2 = displayMode === "support" ? 0 : 1;
-        cutoff3 = displayMode === "support" ? 0.15 : 1.2;
+        // color scheme for turnout
+        if (lastSelectedDropdown === "results") {
+            color1 = white;
+            color2 = grey;
+            color3 = black;
+            cutoff1 = 20000;
+            cutoff2 = 200000;
+            cutoff3 = 500000;
+        } else {
+            color1 = red;
+            color2 = white;
+            color3 = blue;
+            cutoff1 = 0.8;
+            cutoff2 = 1;
+            cutoff3 = 1.2;
+        }
     }
 
-    const { color1, color2, color3 } = colorSchemes[displayMode];
-    
     if (value < cutoff1) {
         return rgbToString(color1);
     } else if (value <= cutoff2) {
