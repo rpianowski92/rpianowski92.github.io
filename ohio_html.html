@@ -299,7 +299,7 @@ function handleElectionSwingChange() {
     
     // Calculate swing for each county
     countyData.features.forEach(function (county) {
-        var swing = county.properties[year2] - county.properties[year1];
+        var swing = county.properties[year1] - county.properties[year2];
         currentElectionSwing[county.properties.GEOID] = swing;
     });
 
