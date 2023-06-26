@@ -76,7 +76,7 @@
         <option value="PRES00">President 2000</option>
         <option value="SEN16">US Senate 2016</option>
         <option value="SEN12">US Senate 2012</option>
-        <option value="SEN08">US Senate 2010</option>
+        <option value="SEN10">US Senate 2010</option>
         <option value="SEN06">US Senate 2006</option>
         <option value="SEN04">US Senate 2004</option>
         <option value="SEN00">US Senate 2000</option>
@@ -120,7 +120,7 @@
         <option value="PRES00">President 2000</option>
         <option value="SEN16">US Senate 2016</option>
         <option value="SEN12">US Senate 2012</option>
-        <option value="SEN08">US Senate 2010</option>
+        <option value="SEN10">US Senate 2010</option>
         <option value="SEN06">US Senate 2006</option>
         <option value="SEN04">US Senate 2004</option>
         <option value="SEN00">US Senate 2000</option>
@@ -165,7 +165,7 @@
         <option value="PRES00">President 2000</option>
         <option value="SEN16">US Senate 2016</option>
         <option value="SEN12">US Senate 2012</option>
-        <option value="SEN08">US Senate 2010</option>
+        <option value="SEN10">US Senate 2010</option>
         <option value="SEN06">US Senate 2006</option>
         <option value="SEN04">US Senate 2004</option>
         <option value="SEN00">US Senate 2000</option>
@@ -227,7 +227,7 @@ function getColor(value) {
 
     const colorSchemes = {
         support: {color1: red, color2: white, color3: blue},
-        turnout: {color1: white, color2: displayMode === "results" ? black : white, color3: displayMode === "results" ? black : blue}
+        turnout: {color1: white, color2: displayMode === "results" ? black : blue, color3: black}
     };
 
     let cutoff1, cutoff2, cutoff3;
@@ -259,6 +259,7 @@ function rgbToString(rgbArray) {
 }
 
 
+
 // Function to adjust label position for specific regions
 function getAdjustedLabelPositions(center, region) {
     let offsetX = 0;
@@ -288,12 +289,17 @@ function updateCutoffs(lower, middle, upper) {
 
 
 function getColorScale() {
-    if (lastSelectedDropdown === "results") {
+    const displayMode = document.getElementById("display-mode-select").value;
+
+    if (displayMode === "support") {
         return 'linear-gradient(to right, rgb(255, 0, 0), rgb(255, 255, 255), rgb(0, 0, 255))';
+    } else if (displayMode === "turnout" && lastSelectedDropdown === "results") {
+        return 'linear-gradient(to right, rgb(255, 255, 255), rgb(0, 0, 0))';
     } else {
         return 'linear-gradient(to right, rgb(255, 0, 0), rgb(255, 255, 255), rgb(0, 0, 255))';
     }
 }
+
 
 function handleElectionResultChange() {
     var displayMode = document.getElementById("display-mode-select").value;
@@ -392,19 +398,31 @@ function addLayers() {
         onEachFeature: function (feature, layer) {
             var value;
             var text;
+            const displayMode = document.getElementById("display-mode-select").value;
+
             if (lastSelectedDropdown === "swings") {
                 value = currentElectionSwing[feature.properties.GEOID];
-                text = "Election swing: ";
+                text = displayMode === "support" ? "Election swing: " : "Turnout swing: ";
             } else {
                 value = feature.properties[currentElectionResult];
-                text = "Election result: ";
+                text = displayMode === "support" ? "Election result: " : "Turnout: ";
             }
-            layer.bindTooltip(`
-                <strong>${feature.properties.NAME}</strong><br />
-                ${text}${(value*100).toFixed(1)}%
-            `);
+
+            if (displayMode === "turnout" && lastSelectedDropdown === "results") {
+                layer.bindTooltip(`
+                    <strong>${feature.properties.NAME}</strong><br />
+                    ${text}${value.toLocaleString('en-US', {maximumFractionDigits: 0})}
+                `);
+            } else {
+                layer.bindTooltip(`
+                    <strong>${feature.properties.NAME}</strong><br />
+                    ${text}${(value*100).toFixed(1)}%
+                `);
+            }
         }
     });
+    // ...
+
 
     // Add region layer
     regionLayer = L.geoJSON(regionData, {
