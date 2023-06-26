@@ -218,31 +218,46 @@
 let lastSelectedDropdown = "results";
 
 function getColor(value) {
+    const displayMode = document.getElementById("display-mode-select").value;
+
     const red = [255, 0, 0];
     const white = [255, 255, 255];
+    const black = [0, 0, 0];
     const blue = [0, 0, 255];
+
+    const colorSchemes = {
+        support: {color1: red, color2: white, color3: blue},
+        turnout: {color1: white, color2: displayMode === "results" ? black : white, color3: displayMode === "results" ? black : blue}
+    };
 
     let cutoff1, cutoff2, cutoff3;
     if (lastSelectedDropdown === "results") {
-        cutoff1 = 0.25;
-        cutoff2 = 0.5;
-        cutoff3 = 0.75;
+        cutoff1 = displayMode === "support" ? 0.25 : 20000;
+        cutoff2 = displayMode === "support" ? 0.5 : 200000;
+        cutoff3 = displayMode === "support" ? 0.75 : 500000;
     } else {
-        cutoff1 = -0.15;
-        cutoff2 = 0;
-        cutoff3 = 0.15;
+        cutoff1 = displayMode === "support" ? -0.15 : 0.8;
+        cutoff2 = displayMode === "support" ? 0 : 1;
+        cutoff3 = displayMode === "support" ? 0.15 : 1.2;
     }
 
+    const { color1, color2, color3 } = colorSchemes[displayMode];
+    
     if (value < cutoff1) {
-        return 'rgb(255, 0, 0)';
+        return rgbToString(color1);
     } else if (value <= cutoff2) {
-        return interpolateColor(red, white, (value - cutoff1) / (cutoff2 - cutoff1));
+        return interpolateColor(color1, color2, (value - cutoff1) / (cutoff2 - cutoff1));
     } else if (value <= cutoff3) {
-        return interpolateColor(white, blue, (value - cutoff2) / (cutoff3 - cutoff2));
+        return interpolateColor(color2, color3, (value - cutoff2) / (cutoff3 - cutoff2));
     } else {
-        return 'rgb(0, 0, 255)';
+        return rgbToString(color3);
     }
 }
+
+function rgbToString(rgbArray) {
+    return `rgb(${rgbArray[0]}, ${rgbArray[1]}, ${rgbArray[2]})`;
+}
+
 
 // Function to adjust label position for specific regions
 function getAdjustedLabelPositions(center, region) {
@@ -281,25 +296,35 @@ function getColorScale() {
 }
 
 function handleElectionResultChange() {
+    var displayMode = document.getElementById("display-mode-select").value;
+    var valueExtension = displayMode === "support" ? "sp" : "tr";
+    var cutoffs = displayMode === "support" ? ['25%', '50%', '75%'] : ['20,000', '200,000', '500,000'];
+
     if (this.value === "Not selected") {
         return;
     }
+
     lastSelectedDropdown = "results";
-    currentElectionResult = this.value + "sp";;
+    currentElectionResult = this.value + valueExtension;
     document.getElementById('election-swing-select-1').value = 'Not selected';
     document.getElementById('election-swing-select-2').value = 'Not selected';
     document.getElementById('color-scale').style.background = getColorScale();
     map.removeLayer(countyLayer);
     map.removeLayer(regionLayer);
-    updateCutoffs('25%', '50%', '75%');  // update cutoffs here
+    updateCutoffs.apply(null, cutoffs);  // update cutoffs here
     addLayers();
 }
 
 var currentElectionSwing = {};
 
 function handleElectionSwingChange() {
-    var year1 = document.getElementById('election-swing-select-1').value + "sp";
-    var year2 = document.getElementById('election-swing-select-2').value + "sp";
+    var displayMode = document.getElementById("display-mode-select").value;
+    var valueExtension = displayMode === "support" ? "sp" : "tr";
+    var cutoffs = displayMode === "support" ? ['-15%', '0%', '15%'] : ['80%', '100%', '120%'];
+    var swingCalculation = displayMode === "support" ? (a, b) => b - a : (a, b) => b / a;
+
+    var year1 = document.getElementById('election-swing-select-1').value + valueExtension;
+    var year2 = document.getElementById('election-swing-select-2').value + valueExtension;
 
     if (year1 === "Not selected" || year2 === "Not selected") {
         return;
@@ -307,7 +332,7 @@ function handleElectionSwingChange() {
     
     // Calculate swing for each county
     countyData.features.forEach(function (county) {
-        var swing = county.properties[year2] - county.properties[year1];
+        var swing = swingCalculation(county.properties[year1], county.properties[year2]);
         currentElectionSwing[county.properties.GEOID] = swing;
     });
 
@@ -316,7 +341,7 @@ function handleElectionSwingChange() {
     document.getElementById('color-scale').style.background = getColorScale();
     map.removeLayer(countyLayer);
     map.removeLayer(regionLayer);
-    updateCutoffs('-15%', '0%', '15%');  // update cutoffs here
+    updateCutoffs.apply(null, cutoffs);  // update cutoffs here
     addLayers();
 }
 
