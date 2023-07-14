@@ -1,0 +1,474 @@
+<head>
+    <title>Transparent Map Overlays</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+
+    <style>
+        #map {
+            width: 100%;
+            height: 650px;
+        }
+        .region-label {
+            font-weight: bold;
+            font-size: 14px;
+            text-align: left;
+            color: #000;
+        }
+        h1 {
+            text-align: center;
+        }
+        #color-scale-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        #color-scale {
+            width: 200px;
+            height: 20px;
+            background: linear-gradient(to right, rgb(255, 0, 0), rgb(255, 255, 255), rgb(0, 0, 255));
+        }
+        #cutoffs {
+            display: flex;
+            justify-content: space-between;
+            width: 200px;
+            margin-bottom: 5px;
+
+        }
+        #cutoffs span {
+            font-size: 12px;
+        }
+        .leaflet-tooltip {
+    background-color: rgba(255, 255, 255, 0.8);
+    border: none;
+    color: #333;
+    </style>
+</head>
+<body>
+    <h1>Pennsylvania regions and Election Results</h1>
+
+    <div id="color-scale-container">
+        <div id="cutoffs">
+            <span id="lower-cutoff">25%</span>
+            <span id="middle-cutoff">50%</span>
+            <span id="upper-cutoff">75%</span>
+        </div>
+        <div id="color-scale"></div>
+        <div style="display: flex; justify-content: space-between; width: 100%; margin-top: 20px;">
+            <div>
+                <b>Display Mode</b> 
+                <select id="display-mode-select">
+                    <option value="support" selected>Support</option>
+                    <option value="turnout">Turnout</option>
+                </select>
+            </div>
+        <div style="display: flex; justify-content: space-between; width: 100%; margin-top: 20px;">
+            <div>
+            <b>Election Results</b> 
+            <select id="election-result-select">
+        <option value="">Not selected</option>
+        <option value="SEN18" selected>US Senate 2018</option>
+        <option value="PRES20">President 2020</option>
+        <option value="PRES16">President 2016</option>
+        <option value="PRES12">President 2012</option>
+        <option value="PRES08">President 2008</option>
+        <option value="PRES04">President 2004</option>
+        <option value="PRES00">President 2000</option>
+        <option value="SEN16">US Senate 2016</option>
+        <option value="SEN12">US Senate 2012</option>
+        <option value="SEN10">US Senate 2010</option>
+        <option value="SEN06">US Senate 2006</option>
+        <option value="SEN04">US Senate 2004</option>
+        <option value="SEN00">US Senate 2000</option>
+        <option value="AG18">Attorney General 2018</option>
+        <option value="AG14">Attorney General 2014</option>
+        <option value="AG10">Attorney General 2010</option>
+        <option value="AG06">Attorney General 2006</option>
+        <option value="AG02">Attorney General 2002</option>
+        <option value="AUD18">Auditor 2018</option>
+        <option value="AUD14">Auditor 2014</option>
+        <option value="AUD10">Auditor 2010</option>
+        <option value="AUD06">Auditor 2006</option>
+        <option value="AUD02">Auditor 2002</option>
+        <option value="GOV18">Governor 2018</option>
+        <option value="GOV14">Governor 2014</option>
+        <option value="GOV10">Governor 2010</option>
+        <option value="GOV06">Governor 2006</option>
+        <option value="GOV02">Governor 2002</option>
+        <option value="TRS18">Treasurer 2018</option>
+        <option value="TRS14">Treasurer 2014</option>
+        <option value="TRS10">Treasurer 2010</option>
+        <option value="TRS06">Treasurer 2006</option>
+        <option value="TRS02">Treasurer 2002</option>                <!-- Add more options as needed -->
+            </select>
+        </div>
+        <div style="margin-left: 20px;">
+            <b>Election Swing 1</b> 
+            <select id="election-swing-select-1">
+                <option value="">Not selected</option>
+        <option value="SEN18" selected>US Senate 2018</option>
+        <option value="PRES20">President 2020</option>
+        <option value="PRES16">President 2016</option>
+        <option value="PRES12">President 2012</option>
+        <option value="PRES08">President 2008</option>
+        <option value="PRES04">President 2004</option>
+        <option value="PRES00">President 2000</option>
+        <option value="SEN16">US Senate 2016</option>
+        <option value="SEN12">US Senate 2012</option>
+        <option value="SEN10">US Senate 2010</option>
+        <option value="SEN06">US Senate 2006</option>
+        <option value="SEN04">US Senate 2004</option>
+        <option value="SEN00">US Senate 2000</option>
+        <option value="AG18">Attorney General 2018</option>
+        <option value="AG14">Attorney General 2014</option>
+        <option value="AG10">Attorney General 2010</option>
+        <option value="AG06">Attorney General 2006</option>
+        <option value="AG02">Attorney General 2002</option>
+        <option value="AUD18">Auditor 2018</option>
+        <option value="AUD14">Auditor 2014</option>
+        <option value="AUD10">Auditor 2010</option>
+        <option value="AUD06">Auditor 2006</option>
+        <option value="AUD02">Auditor 2002</option>
+        <option value="GOV18">Governor 2018</option>
+        <option value="GOV14">Governor 2014</option>
+        <option value="GOV10">Governor 2010</option>
+        <option value="GOV06">Governor 2006</option>
+        <option value="GOV02">Governor 2002</option>
+        <option value="TRS18">Treasurer 2018</option>
+        <option value="TRS14">Treasurer 2014</option>
+        <option value="TRS10">Treasurer 2010</option>
+        <option value="TRS06">Treasurer 2006</option>
+        <option value="TRS02">Treasurer 2002</option>                      
+                <!-- Add more options as needed -->
+            </select>
+            </div>
+                <div style="margin-left: 20px;">
+            <b>Election Swing 2</b> 
+            <select id="election-swing-select-2">
+                <option value="">Not selected</option>
+        <option value="SEN18" selected>US Senate 2018</option>
+        <option value="PRES20">President 2020</option>
+        <option value="PRES16">President 2016</option>
+        <option value="PRES12">President 2012</option>
+        <option value="PRES08">President 2008</option>
+        <option value="PRES04">President 2004</option>
+        <option value="PRES00">President 2000</option>
+        <option value="SEN16">US Senate 2016</option>
+        <option value="SEN12">US Senate 2012</option>
+        <option value="SEN10">US Senate 2010</option>
+        <option value="SEN06">US Senate 2006</option>
+        <option value="SEN04">US Senate 2004</option>
+        <option value="SEN00">US Senate 2000</option>
+        <option value="AG18">Attorney General 2018</option>
+        <option value="AG14">Attorney General 2014</option>
+        <option value="AG10">Attorney General 2010</option>
+        <option value="AG06">Attorney General 2006</option>
+        <option value="AG02">Attorney General 2002</option>
+        <option value="AUD18">Auditor 2018</option>
+        <option value="AUD14">Auditor 2014</option>
+        <option value="AUD10">Auditor 2010</option>
+        <option value="AUD06">Auditor 2006</option>
+        <option value="AUD02">Auditor 2002</option>
+        <option value="GOV18">Governor 2018</option>
+        <option value="GOV14">Governor 2014</option>
+        <option value="GOV10">Governor 2010</option>
+        <option value="GOV06">Governor 2006</option>
+        <option value="GOV02">Governor 2002</option>
+        <option value="TRS18">Treasurer 2018</option>
+        <option value="TRS14">Treasurer 2014</option>
+        <option value="TRS10">Treasurer 2010</option>
+        <option value="TRS06">Treasurer 2006</option>
+        <option value="TRS02">Treasurer 2002</option>                      
+                <!-- Add more options as needed -->
+            </select>
+            </div>
+        </div>
+    </div>
+    <div id="map"></div>
+
+<script>
+    // Initialize the map
+    var map = L.map('map').setView([41, -77], 7); // You can set the initial coordinates and zoom level based on your state
+    function interpolateColor(a, b, t) {
+        const [r1, g1, b1] = a;
+        const [r2, g2, b2] = b;
+
+        const r = r1 + (r2 - r1) * t;
+        const g = g1 + (g2 - g1) * t;
+        const bInterpolated = b1 + (b2 - b1) * t;
+
+        return `rgb(${r.toFixed(0)}, ${g.toFixed(0)}, ${bInterpolated.toFixed(0)})`;
+    }
+
+let lastSelectedDropdown = "results";
+
+function getColor(value) {
+    const displayMode = document.getElementById("display-mode-select").value;
+
+    const red = [255, 0, 0];
+    const white = [255, 255, 255];
+    const grey = [128, 128, 128];
+    const blue = [0, 0, 255];
+    const black = [0, 0, 0];
+
+    let color1, color2, color3, cutoff1, cutoff2, cutoff3;
+
+    if (displayMode === "support") {
+        // color scheme for support
+        color1 = red;
+        color2 = white;
+        color3 = blue;
+
+        if (lastSelectedDropdown === "results") {
+            cutoff1 = 0.25;
+            cutoff2 = 0.5;
+            cutoff3 = 0.75;
+        } else {
+            cutoff1 = -0.15;
+            cutoff2 = 0;
+            cutoff3 = 0.15;
+        }
+
+    } else {
+        // color scheme for turnout
+        if (lastSelectedDropdown === "results") {
+            color1 = white;
+            color2 = grey;
+            color3 = black;
+            cutoff1 = 20000;
+            cutoff2 = 200000;
+            cutoff3 = 500000;
+        } else {
+            color1 = red;
+            color2 = white;
+            color3 = blue;
+            cutoff1 = 0.8;
+            cutoff2 = 1;
+            cutoff3 = 1.2;
+        }
+    }
+
+    if (value < cutoff1) {
+        return rgbToString(color1);
+    } else if (value <= cutoff2) {
+        return interpolateColor(color1, color2, (value - cutoff1) / (cutoff2 - cutoff1));
+    } else if (value <= cutoff3) {
+        return interpolateColor(color2, color3, (value - cutoff2) / (cutoff3 - cutoff2));
+    } else {
+        return rgbToString(color3);
+    }
+}
+
+function rgbToString(rgbArray) {
+    return `rgb(${rgbArray[0]}, ${rgbArray[1]}, ${rgbArray[2]})`;
+}
+
+
+
+// Function to adjust label position for specific regions
+function getAdjustedLabelPositions(center, region) {
+    let offsetX = 0;
+    let offsetY = 0;
+
+    const positions = [];
+
+    positions.push({
+        lat: center.lat + offsetY,
+        lng: center.lng + offsetX,
+        fontSize: '16px'
+    });
+
+    return positions;
+}
+
+// Function to update cutoffs
+function updateCutoffs(lower, middle, upper) {
+    document.getElementById('lower-cutoff').textContent = lower;
+    document.getElementById('middle-cutoff').textContent = middle;
+    document.getElementById('upper-cutoff').textContent = upper;
+}
+
+        var currentElectionResult = "SEN18sp";
+        var countyLayer;
+        var regionLayer;
+
+
+function getColorScale() {
+    const displayMode = document.getElementById("display-mode-select").value;
+
+    if (displayMode === "support") {
+        return 'linear-gradient(to right, rgb(255, 0, 0), rgb(255, 255, 255), rgb(0, 0, 255))';
+    } else if (displayMode === "turnout" && lastSelectedDropdown === "results") {
+        return 'linear-gradient(to right, rgb(255, 255, 255), rgb(0, 0, 0))';
+    } else {
+        return 'linear-gradient(to right, rgb(255, 0, 0), rgb(255, 255, 255), rgb(0, 0, 255))';
+    }
+}
+
+
+function handleElectionResultChange() {
+    var displayMode = document.getElementById("display-mode-select").value;
+    var valueExtension = displayMode === "support" ? "sp" : "tr";
+    var cutoffs = displayMode === "support" ? ['25%', '50%', '75%'] : ['20,000', '200,000', '500,000'];
+
+    if (this.value === "Not selected") {
+        return;
+    }
+
+    lastSelectedDropdown = "results";
+    currentElectionResult = this.value + valueExtension;
+    document.getElementById('election-swing-select-1').value = 'Not selected';
+    document.getElementById('election-swing-select-2').value = 'Not selected';
+    document.getElementById('color-scale').style.background = getColorScale();
+    map.removeLayer(countyLayer);
+    map.removeLayer(regionLayer);
+    updateCutoffs.apply(null, cutoffs);  // update cutoffs here
+    addLayers();
+}
+
+var currentElectionSwing = {};
+
+function handleElectionSwingChange() {
+    var displayMode = document.getElementById("display-mode-select").value;
+    var valueExtension = displayMode === "support" ? "sp" : "tr";
+    var cutoffs = displayMode === "support" ? ['-15%', '0%', '15%'] : ['80%', '100%', '120%'];
+    var swingCalculation = displayMode === "support" ? (a, b) => b - a : (a, b) => b / a;
+
+    var year1 = document.getElementById('election-swing-select-1').value + valueExtension;
+    var year2 = document.getElementById('election-swing-select-2').value + valueExtension;
+
+    if (year1 === "Not selected" || year2 === "Not selected") {
+        return;
+    }
+    
+    // Calculate swing for each county
+    countyData.features.forEach(function (county) {
+        var swing = swingCalculation(county.properties[year1], county.properties[year2]);
+        currentElectionSwing[county.properties.GEOID] = swing;
+    });
+
+    lastSelectedDropdown = "swings";
+    document.getElementById('election-result-select').value = 'Not selected';
+    document.getElementById('color-scale').style.background = getColorScale();
+    map.removeLayer(countyLayer);
+    map.removeLayer(regionLayer);
+    updateCutoffs.apply(null, cutoffs);  // update cutoffs here
+    addLayers();
+}
+
+
+
+document.getElementById('election-result-select').addEventListener('change', handleElectionResultChange);
+document.getElementById('election-swing-select-1').addEventListener('change', handleElectionSwingChange);
+document.getElementById('election-swing-select-2').addEventListener('change', handleElectionSwingChange);
+
+
+    // Add the base map (OpenStreetMap)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+            // Load county and region GeoJSON data
+        var countyData;
+        var regionData;
+        fetch('https://rpianowski92.github.io/pennsylvania_counties.geojson')
+            .then(response => response.json())
+            .then(data => {
+                countyData = data;
+                fetch('https://rpianowski92.github.io/pa_regions.geojson')
+                    .then(response => response.json())
+                    .then(data => {
+                        regionData = data;
+                        addLayers();
+                    });
+            });
+
+function addLayers() {
+    // Add county layer
+    countyLayer = L.geoJSON(countyData, {
+        style: function(feature) {
+            var value;
+            if (lastSelectedDropdown === "swings") {
+                value = currentElectionSwing[feature.properties.GEOID];
+            } else {
+                value = feature.properties[currentElectionResult];
+            }
+
+            return {
+                color: getColor(value),
+                weight: 1,
+                fillOpacity: 0.5
+            };
+        },
+        onEachFeature: function (feature, layer) {
+            var value;
+            var text;
+            const displayMode = document.getElementById("display-mode-select").value;
+
+            if (lastSelectedDropdown === "swings") {
+                value = currentElectionSwing[feature.properties.GEOID];
+                text = displayMode === "support" ? "Election swing: " : "Turnout swing: ";
+            } else {
+                value = feature.properties[currentElectionResult];
+                text = displayMode === "support" ? "Election result: " : "Turnout: ";
+            }
+
+            if (displayMode === "turnout" && lastSelectedDropdown === "results") {
+                layer.bindTooltip(`
+                    <strong>${feature.properties.NAME}</strong><br />
+                    ${text}${value.toLocaleString('en-US', {maximumFractionDigits: 0})}
+                `);
+            } else {
+                layer.bindTooltip(`
+                    <strong>${feature.properties.NAME}</strong><br />
+                    ${text}${(value*100).toFixed(1)}%
+                `);
+            }
+        }
+    });
+    // ...
+
+
+    // Add region layer
+    regionLayer = L.geoJSON(regionData, {
+        interactive: false, // Add this line
+        style: {
+            color: 'black',
+            weight: 3,
+            fillOpacity: 0
+        },
+        onEachFeature: function (feature, layer) {
+            if (feature.properties && feature.properties.region) {
+                const center = layer.getBounds().getCenter();
+                const adjustedPositions = getAdjustedLabelPositions(center, feature.properties.region);
+
+                adjustedPositions.forEach(position => {
+                    const labelText = L.marker([position.lat, position.lng], {
+                        icon: L.divIcon({
+                            className: 'region-label',
+                            html: feature.properties.region,
+                            iconSize: null,
+                            iconAnchor: [30, 10],
+                            cssClass: 'label-' + feature.properties.region.replace(/\s+/g, '-')
+                        }),
+                        zIndexOffset: 1000
+                    }).addTo(map);
+
+                    // Add custom style to the label
+                    const labelClassName = 'label-' + feature.properties.region.replace(/\s+/g, '-');
+                    const labelElements = document.getElementsByClassName(labelClassName);
+                    for (let i = 0; i < labelElements.length; i++) {
+                        labelElements[i].style.fontSize = position.fontSize;
+                    }
+                });
+            }
+        }
+    });
+    countyLayer.addTo(map);
+    regionLayer.addTo(map);
+
+};
+</script>
+
+</body>
+</html>
