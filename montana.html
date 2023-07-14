@@ -526,7 +526,7 @@ function addLayers() {
                     const labelText = L.marker([position.lat, position.lng], {
                         icon: L.divIcon({
                             className: 'region-label',
-                            html: feature.properties.region,
+                            html: feature.properties.Region,
                             iconSize: null,
                             iconAnchor: [30, 10],
                             cssClass: 'label-' + feature.properties.Region.replace(/\s+/g, '-')
