@@ -518,9 +518,9 @@ function addLayers() {
             fillOpacity: 0
         },
         onEachFeature: function (feature, layer) {
-            if (feature.properties && feature.properties.region) {
+            if (feature.properties && feature.properties.Region) {
                 const center = layer.getBounds().getCenter();
-                const adjustedPositions = getAdjustedLabelPositions(center, feature.properties.region);
+                const adjustedPositions = getAdjustedLabelPositions(center, feature.properties.Region);
 
                 adjustedPositions.forEach(position => {
                     const labelText = L.marker([position.lat, position.lng], {
@@ -529,13 +529,13 @@ function addLayers() {
                             html: feature.properties.region,
                             iconSize: null,
                             iconAnchor: [30, 10],
-                            cssClass: 'label-' + feature.properties.region.replace(/\s+/g, '-')
+                            cssClass: 'label-' + feature.properties.Region.replace(/\s+/g, '-')
                         }),
                         zIndexOffset: 1000
                     }).addTo(map);
 
                     // Add custom style to the label
-                    const labelClassName = 'label-' + feature.properties.region.replace(/\s+/g, '-');
+                    const labelClassName = 'label-' + feature.properties.Region.replace(/\s+/g, '-');
                     const labelElements = document.getElementsByClassName(labelClassName);
                     for (let i = 0; i < labelElements.length; i++) {
                         labelElements[i].style.fontSize = position.fontSize;
